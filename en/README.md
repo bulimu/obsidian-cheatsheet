@@ -4,16 +4,16 @@
 
 - [Obsidian Cheatsheet](#obsidian-cheatsheet)
   - [Table of Contents](#table-of-contents)
-  - [Basic Operations](#basic-operations)
-  - [Formatting](#formatting)
-  - [Lists and Tasks](#lists-and-tasks)
-  - [Links and References](#links-and-references)
-  - [Recommended Plugins](#recommended-plugins)
-  - [Theme Settings](#theme-settings)
+    - [Basic Operations](#basic-operations)
+    - [Formatting](#formatting)
+    - [Lists and Tasks](#lists-and-tasks)
+    - [Links and References](#links-and-references)
+    - [Recommended Plugins](#recommended-plugins)
+    - [Theme Settings](#theme-settings)
 
 ---
 
-## Basic Operations
+### Basic Operations
 
 | Function            | Shortcut/Syntax          | Description                           |
 | ------------------- | ------------------------ | ------------------------------------- |
@@ -29,7 +29,7 @@
 | New Tab             | `Ctrl/Cmd + T`           | Open in new tab                       |
 | Close Current Tab   | `Ctrl/Cmd + W`           | Close current tab                     |
 
-## Formatting
+### Formatting
 
 | Format            | Syntax                     | Example                                            |
 | ----------------- | -------------------------- | -------------------------------------------------- |
@@ -64,7 +64,7 @@ Table Example:
 | :--- | :----: | ----: |
 | cell |  cell  |  cell |
 
-==Headings==
+**Headings**
 
 > # Heading 1
 >
@@ -74,7 +74,7 @@ Table Example:
 >
 > ......
 
-## Lists and Tasks
+### Lists and Tasks
 
 | Type          | Syntax               | Example  |
 | ------------- | -------------------- | -------- |
@@ -84,7 +84,7 @@ Table Example:
 | Complete Task | `- [x] Task`         | ☑ Task   |
 | Nested List   | Indent 2 spaces      | Sub-list |
 
-## Links and References
+### Links and References
 
 | Type            | Syntax                   | Description                                                                  |
 | --------------- | ------------------------ | ---------------------------------------------------------------------------- |
@@ -96,7 +96,7 @@ Table Example:
 | Block Reference | `![[Note Name^blockID]]` | Add `^block-id` after paragraph, reference via `[[Note^block-id]]`           |
 | Header Link     | `[[Note Name#Heading]]`  | `[[Note-2025#Header]]` links to `## Heading` in `Note-2025`                  |
 
-## Recommended Plugins
+### Recommended Plugins
 
 | Plugin Name | Type      | Main Function      |
 | ----------- | --------- | ------------------ |
@@ -108,7 +108,7 @@ Table Example:
 | Daily notes | Core      | Daily Notes        |
 | Graph view  | Core      | Graph View         |
 
-## Theme Settings
+### Theme Settings
 
 1. Open Settings: `Ctrl/Cmd + ,`
 2. Select `Appearance` in left menu
