@@ -1,9 +1,8 @@
 # Obsidian Cheatsheet
 
-### Table of Contents
+### Contents
 
 - [Obsidian Cheatsheet](#obsidian-cheatsheet)
-  - [Table of Contents](#table-of-contents)
   - [Basic Operations](#basic-operations)
   - [Formatting](#formatting)
   - [Lists and Tasks](#lists-and-tasks)

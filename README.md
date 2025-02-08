@@ -1,8 +1,6 @@
-# Obsidian Cheatsheet | Obsidian 速查表 | Obsidian Spickzettel
+# Obsidian Cheatsheet | Obsidian 速查表
 
 A comprehensive cheatsheet for Obsidian in multiple languages (English, Chinese, German).
-多语言版本的 Obsidian 速查表（英语、中文、德语）
-Umfassendes Spickzettel für Obsidian in mehreren Sprachen (Englisch, Chinesisch, Deutsch)
 
 ## 📚 Languages | 语言 | Sprachen
 
@@ -10,15 +8,33 @@ Umfassendes Spickzettel für Obsidian in mehreren Sprachen (Englisch, Chinesisch
 - [中文](./zh/README.md)
 - [Deutsch](./de/README.md)
 
-## 🌟 Contents
+## 🌟 Contents | 目录 | Inhalt
 
-- Markdown Syntax | Markdown 语法 | Markdown-Syntax
-- Keyboard Shortcuts | 键盘快捷键 | Tastenkombinationen
-- Essential Plugins | 必备插件 | Wichtige Plugins
-- Tips & Tricks | 使用技巧 | Tipps & Tricks
-- Themes | 主题 | Themen
-- Mobile Usage | 移动端使用 | Mobile Nutzung
+Each language version includes the following sections:  
+每个语言版本包含以下部分：  
+Jede Sprachversion enthält die folgenden Abschnitte:
 
-## 🤝 Contributing
+### Basic Operations | 基础操作 | Grundlegende Funktionen
 
-Feel free to contribute by submitting pull requests!
+- Keyboard shortcuts | 键盘快捷键 | Tastenkombinationen
+- Essential commands | 常用命令 | Wichtige Befehle
+
+### Markdown Formatting | Markdown 格式 | Markdown-Formatierung
+
+- Headers, Lists, Tables | 标题、列表、表格 | Überschriften, Listen, Tabellen
+- Text styling | 文本样式 | Textformatierung
+- Code blocks | 代码块 | Codeblöcke
+
+### Advanced Features | 高级功能 | Erweiterte Funktionen
+
+- Links & References | 链接与引用 | Links & Referenzen
+- Tasks & Projects | 任务与项目 | Aufgaben & Projekte
+- Plugins & Themes | 插件与主题 | Plugins & Themes
+
+## 🤝 Contributing | 贡献 | Mitwirken
+
+Please submit pull requests or open issues on GitHub.
+
+## 📝 License | 许可 | Lizenz
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
