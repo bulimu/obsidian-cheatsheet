@@ -1,15 +1,15 @@
 # Obsidian Cheatsheet
 
-## Table of Contents
+### Table of Contents
 
 - [Obsidian Cheatsheet](#obsidian-cheatsheet)
   - [Table of Contents](#table-of-contents)
-    - [Basic Operations](#basic-operations)
-    - [Formatting](#formatting)
-    - [Lists and Tasks](#lists-and-tasks)
-    - [Links and References](#links-and-references)
-    - [Recommended Plugins](#recommended-plugins)
-    - [Theme Settings](#theme-settings)
+  - [Basic Operations](#basic-operations)
+  - [Formatting](#formatting)
+  - [Lists and Tasks](#lists-and-tasks)
+  - [Links and References](#links-and-references)
+  - [Recommended Plugins](#recommended-plugins)
+  - [Theme Settings](#theme-settings)
 
 ---
 
@@ -71,8 +71,6 @@ Table Example:
 > ## Heading 2
 >
 > ### Heading 3
->
-> ......
 
 ### Lists and Tasks
 
