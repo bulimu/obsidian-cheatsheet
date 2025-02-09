@@ -49,23 +49,34 @@ jobs:
           SUCCESS_LIST=$(mktemp)
           
           # Process each language
-          jq -r '.languages | to_entries[] | [.key, .value.inputFile, .value.outputFile] | @tsv' $CONFIG_FILE | while IFS=$'\t' read -r lang input output; do
+          for lang in zh en de; do
             echo "Processing $lang..."
-            echo "Input file: $input"
-            echo "Output file: $output"
             
-            if [ -f "$input" ]; then
-              output_dir=$(dirname "$output")
-              mkdir -p "$output_dir"
+            # Set input and output paths
+            INPUT_FILE="${lang}/README.md"
+            OUTPUT_FILE="${lang}/obsidian-cheatsheet-${lang}.pdf"
+            
+            echo "Input file: $INPUT_FILE"
+            echo "Output file: $OUTPUT_FILE"
+            
+            if [ -f "$INPUT_FILE" ]; then
+              # Create output directory if it doesn't exist
+              mkdir -p "$(dirname "$OUTPUT_FILE")"
               
-              if md-to-pdf "$input" --config-file .md2pdf.json --output "$output" --debug && [ -f "$output" ]; then
-                echo "Successfully created: $output"
-                echo "$output" >> "$SUCCESS_LIST"
+              # Convert markdown to PDF
+              echo "Converting $INPUT_FILE to PDF..."
+              if md-to-pdf "$INPUT_FILE" --config-file .md2pdf.json --output "$OUTPUT_FILE" --debug; then
+                if [ -f "$OUTPUT_FILE" ]; then
+                  echo "Successfully created: $OUTPUT_FILE"
+                  echo "$OUTPUT_FILE" >> "$SUCCESS_LIST"
+                else
+                  echo "Error: PDF file not found after conversion"
+                fi
               else
                 echo "Error: Conversion failed for $lang"
               fi
             else
-              echo "Error: Input file not found: $input"
+              echo "Warning: Input file not found: $INPUT_FILE"
             fi
           done
           
@@ -73,22 +84,38 @@ jobs:
           if [ -s "$SUCCESS_LIST" ]; then
             echo "Generated PDF files:"
             cat "$SUCCESS_LIST"
-            # Convert file list to space-separated string for output
-            PDF_LIST=$(tr '\n' ' ' < "$SUCCESS_LIST")
-            echo "pdf_list=$PDF_LIST" >> $GITHUB_OUTPUT
+            echo "Files in workspace:"
+            find . -type f -name "*.pdf"
+            
+            # Set output variables
+            echo "has_pdfs=true" >> $GITHUB_OUTPUT
+            echo "pdf_paths<<EOF" >> $GITHUB_OUTPUT
+            cat "$SUCCESS_LIST" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
           else
             echo "No PDF files were generated"
-            echo "pdf_list=" >> $GITHUB_OUTPUT
+            echo "has_pdfs=false" >> $GITHUB_OUTPUT
           fi
           
           # Cleanup temporary file
           rm -f "$SUCCESS_LIST"
 
+      - name: Debug Generated Files
+        run: |
+          echo "Has PDFs: ${{ steps.convert.outputs.has_pdfs }}"
+          echo "Current directory contents:"
+          ls -R
+          echo "Looking for PDF files:"
+          find . -name "*.pdf"
+
       - name: Upload PDFs as artifacts
-        if: steps.convert.outputs.pdf_list != ''
+        if: steps.convert.outputs.has_pdfs == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: obsidian-cheatsheets
-          path: ${{ steps.convert.outputs.pdf_list }}
+          path: |
+            zh/obsidian-cheatsheet-zh.pdf
+            en/obsidian-cheatsheet-en.pdf
+            de/obsidian-cheatsheet-de.pdf
           retention-days: 90
           if-no-files-found: warn
