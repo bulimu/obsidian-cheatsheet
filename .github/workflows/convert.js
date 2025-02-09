@@ -18,6 +18,10 @@ async function convertToPDF(lang, inputFile, outputFile) {
         <head>
           <meta charset="UTF-8">
           <style>
+            @font-face {
+              font-family: 'Noto Sans CJK SC';
+              src: local('Noto Sans CJK SC');
+            }
             body {
               font-family: ${
                 lang === 'zh' ? "'Noto Sans CJK SC'" : 'Arial'
@@ -26,6 +30,9 @@ async function convertToPDF(lang, inputFile, outputFile) {
               margin: 0 auto;
               padding: 20px;
               line-height: 1.6;
+            }
+            * {
+              font-family: inherit;
             }
             pre {
               background: #f6f8fa;
@@ -55,9 +62,15 @@ async function convertToPDF(lang, inputFile, outputFile) {
     `;
 
     // Launch browser and create PDF
-    const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
+    const browser = await puppeteer.launch({
+      args: ['--no-sandbox', '--font-render-hinting=none'],
+    });
     const page = await browser.newPage();
     await page.setContent(styledHtml);
+
+    // Ensure fonts are loaded
+    await page.evaluateHandle('document.fonts.ready');
+
     await page.pdf({
       path: outputFile,
       format: 'A4',
