@@ -3,62 +3,48 @@ on:
   push:
     paths:
       - '**/README.md'
-      - '.github/workflows/convert-to-pdf.yml'
+      - '.github/workflows/**'
   workflow_dispatch:
 
 jobs:
   convert:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - uses: actions/checkout@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: Setup Pandoc
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y pandoc texlive-xetex fonts-noto-cjk
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
 
-      - name: Convert Chinese README to PDF
-        run: |
-          cd zh
-          pandoc README.md \
-            -f markdown \
-            -t pdf \
-            --pdf-engine=xelatex \
-            -V mainfont="Noto Sans CJK SC" \
-            -V geometry:margin=1in \
-            -o obsidian-cheatsheet_zh.pdf
-        continue-on-error: true
+      - name: Install md-to-pdf
+        run: npm install -g md-to-pdf
 
-      - name: Convert English README to PDF
-        run: |
-          cd en
-          pandoc README.md \
-            -f markdown \
-            -t pdf \
-            --pdf-engine=xelatex \
-            -V geometry:margin=1in \
-            -o obsidian-cheatsheet_en.pdf
-        continue-on-error: true
+      - name: Install jq
+        run: sudo apt-get install -y jq
 
-      - name: Convert German README to PDF
+      - name: Convert PDFs
         run: |
-          cd de
-          pandoc README.md \
-            -f markdown \
-            -t pdf \
-            --pdf-engine=xelatex \
-            -V geometry:margin=1in \
-            -o obsidian-cheatsheet_de.pdf
-        continue-on-error: true
+          CONFIG_FILE=".github/workflows/pdf-config.json"
+          
+          # 获取PDF选项
+          PDF_OPTIONS=$(jq -c '.pdfOptions' $CONFIG_FILE)
+          
+          # 创建临时配置文件
+          echo "$PDF_OPTIONS" > .md2pdf.json
+          
+          # 遍历每种语言
+          jq -r '.languages | to_entries[] | [.key, .value.inputFile, .value.outputFile] | @tsv' $CONFIG_FILE | while IFS=$'\t' read -r lang input output; do
+            echo "Processing $lang..."
+            md-to-pdf "$input" --config-file .md2pdf.json --output "$output"
+          done
 
-      - name: Commit PDFs
-        run: |
-          git config --local user.email "cheng-wf@hotmail.com"
-          git config --local user.name "bulimu"
-          git add **/obsidian-cheatsheet_*.pdf
-          git commit -m "Update PDF files" || echo "No changes to commit"
-          git push origin HEAD:main
+      - name: Upload PDFs as artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: obsidian-cheatsheets
+          path: |
+            zh/obsidian-cheatsheet_zh.pdf
+            en/obsidian-cheatsheet_en.pdf
+            de/obsidian-cheatsheet_de.pdf
+          retention-days: 90
