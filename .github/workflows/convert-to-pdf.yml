@@ -20,31 +20,13 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install markdown-pdf and dependencies
+      - name: Install dependencies
         run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium-browser
-          npm install -g markdown-pdf
-          markdown-pdf --version
-
-      - name: Install jq
-        run: sudo apt-get install -y jq
+          npm install -g marked puppeteer
 
       - name: Convert PDFs
         id: convert
         run: |
-          CONFIG_FILE=".github/workflows/pdf-config.json"
-          
-          # Check if config file exists
-          if [ ! -f "$CONFIG_FILE" ]; then
-            echo "Error: Configuration file not found: $CONFIG_FILE"
-            exit 1
-          fi
-          
-          # Get PDF options from config
-          PDF_OPTIONS=$(jq -c '.pdfOptions' $CONFIG_FILE)
-          echo "$PDF_OPTIONS" > .md2pdf.json
-          
           # Create temporary file to store successful conversions
           SUCCESS_LIST=$(mktemp)
           
@@ -65,7 +47,7 @@ jobs:
               
               # Convert markdown to PDF
               echo "Converting $INPUT_FILE to PDF..."
-              if markdown-pdf "$INPUT_FILE" -o "$OUTPUT_FILE" -s github -r landscape; then
+              if node .github/workflows/convert.js "$lang" "$INPUT_FILE" "$OUTPUT_FILE"; then
                 if [ -f "$OUTPUT_FILE" ]; then
                   echo "Successfully created: $OUTPUT_FILE"
                   echo "$OUTPUT_FILE" >> "$SUCCESS_LIST"
@@ -89,9 +71,6 @@ jobs:
             
             # Set output variables
             echo "has_pdfs=true" >> $GITHUB_OUTPUT
-            echo "pdf_paths<<EOF" >> $GITHUB_OUTPUT
-            cat "$SUCCESS_LIST" >> $GITHUB_OUTPUT
-            echo "EOF" >> $GITHUB_OUTPUT
           else
             echo "No PDF files were generated"
             echo "has_pdfs=false" >> $GITHUB_OUTPUT
@@ -99,14 +78,6 @@ jobs:
           
           # Cleanup temporary file
           rm -f "$SUCCESS_LIST"
-
-      - name: Debug Generated Files
-        run: |
-          echo "Has PDFs: ${{ steps.convert.outputs.has_pdfs }}"
-          echo "Current directory contents:"
-          ls -R
-          echo "Looking for PDF files:"
-          find . -name "*.pdf"
 
       - name: Upload PDFs as artifacts
         if: steps.convert.outputs.has_pdfs == 'true'
