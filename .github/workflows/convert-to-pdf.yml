@@ -1,0 +1,60 @@
+name: Convert README to PDF
+on:
+  push:
+    paths:
+      - '**/README.md'
+      - '.github/workflows/convert-to-pdf.yml'
+  workflow_dispatch:
+
+jobs:
+  convert:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Pandoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc texlive-xetex fonts-noto-cjk
+
+      - name: Convert Chinese README to PDF
+        run: |
+          cd zh
+          pandoc README.md \
+            -f markdown \
+            -t pdf \
+            --pdf-engine=xelatex \
+            -V mainfont="Noto Sans CJK SC" \
+            -V geometry:margin=1in \
+            -o obsidian-cheatsheet_zh.pdf
+        continue-on-error: true
+
+      - name: Convert English README to PDF
+        run: |
+          cd en
+          pandoc README.md \
+            -f markdown \
+            -t pdf \
+            --pdf-engine=xelatex \
+            -V geometry:margin=1in \
+            -o obsidian-cheatsheet_en.pdf
+        continue-on-error: true
+
+      - name: Convert German README to PDF
+        run: |
+          cd de
+          pandoc README.md \
+            -f markdown \
+            -t pdf \
+            --pdf-engine=xelatex \
+            -V geometry:margin=1in \
+            -o obsidian-cheatsheet_de.pdf
+        continue-on-error: true
+
+      - name: Commit PDFs
+        run: |
+          git config --local user.email "cheng-wf@hotmail.com"
+          git config --local user.name "bulimu"
+          git add **/obsidian-cheatsheet_*.pdf
+          git commit -m "Update PDF files" || echo "No changes to commit"
+          git push
