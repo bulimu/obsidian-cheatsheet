@@ -1,6 +1,9 @@
 name: Convert README to PDF
 on:
   push:
+    branches:
+      - main
+      - master
     paths:
       - '**/README.md'
       - '.github/workflows/**'
@@ -17,34 +20,75 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Install md-to-pdf
-        run: npm install -g md-to-pdf
+      - name: Install md-to-pdf and dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y chromium-browser
+          npm install -g md-to-pdf
+          md-to-pdf --version
 
       - name: Install jq
         run: sudo apt-get install -y jq
 
       - name: Convert PDFs
+        id: convert
         run: |
           CONFIG_FILE=".github/workflows/pdf-config.json"
           
-          # 获取PDF选项
-          PDF_OPTIONS=$(jq -c '.pdfOptions' $CONFIG_FILE)
+          # Check if config file exists
+          if [ ! -f "$CONFIG_FILE" ]; then
+            echo "Error: Configuration file not found: $CONFIG_FILE"
+            exit 1
+          fi
           
-          # 创建临时配置文件
+          # Get PDF options from config
+          PDF_OPTIONS=$(jq -c '.pdfOptions' $CONFIG_FILE)
           echo "$PDF_OPTIONS" > .md2pdf.json
           
-          # 遍历每种语言
+          # Create temporary file to store successful conversions
+          SUCCESS_LIST=$(mktemp)
+          
+          # Process each language
           jq -r '.languages | to_entries[] | [.key, .value.inputFile, .value.outputFile] | @tsv' $CONFIG_FILE | while IFS=$'\t' read -r lang input output; do
             echo "Processing $lang..."
-            md-to-pdf "$input" --config-file .md2pdf.json --output "$output"
+            echo "Input file: $input"
+            echo "Output file: $output"
+            
+            if [ -f "$input" ]; then
+              output_dir=$(dirname "$output")
+              mkdir -p "$output_dir"
+              
+              if md-to-pdf "$input" --config-file .md2pdf.json --output "$output" --debug && [ -f "$output" ]; then
+                echo "Successfully created: $output"
+                echo "$output" >> "$SUCCESS_LIST"
+              else
+                echo "Error: Conversion failed for $lang"
+              fi
+            else
+              echo "Error: Input file not found: $input"
+            fi
           done
+          
+          # Check if any files were successfully generated
+          if [ -s "$SUCCESS_LIST" ]; then
+            echo "Generated PDF files:"
+            cat "$SUCCESS_LIST"
+            # Convert file list to space-separated string for output
+            PDF_LIST=$(tr '\n' ' ' < "$SUCCESS_LIST")
+            echo "pdf_list=$PDF_LIST" >> $GITHUB_OUTPUT
+          else
+            echo "No PDF files were generated"
+            echo "pdf_list=" >> $GITHUB_OUTPUT
+          fi
+          
+          # Cleanup temporary file
+          rm -f "$SUCCESS_LIST"
 
       - name: Upload PDFs as artifacts
+        if: steps.convert.outputs.pdf_list != ''
         uses: actions/upload-artifact@v4
         with:
           name: obsidian-cheatsheets
-          path: |
-            zh/obsidian-cheatsheet_zh.pdf
-            en/obsidian-cheatsheet_en.pdf
-            de/obsidian-cheatsheet_de.pdf
+          path: ${{ steps.convert.outputs.pdf_list }}
           retention-days: 90
+          if-no-files-found: warn
