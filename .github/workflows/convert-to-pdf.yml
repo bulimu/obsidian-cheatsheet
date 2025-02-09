@@ -9,8 +9,12 @@ on:
 jobs:
   convert:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Setup Pandoc
         run: |
@@ -57,4 +61,4 @@ jobs:
           git config --local user.name "bulimu"
           git add **/obsidian-cheatsheet_*.pdf
           git commit -m "Update PDF files" || echo "No changes to commit"
-          git push
+          git push origin HEAD:main
