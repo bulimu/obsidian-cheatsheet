@@ -1,92 +1,45 @@
 name: Convert README to PDF
 on:
   push:
-    branches:
-      - main
-      - master
     paths:
       - '**/README.md'
-      - '.github/workflows/**'
+      - '.github/workflows/convert-to-pdf.yml'
   workflow_dispatch:
 
 jobs:
   convert:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
-      
+      - uses: actions/checkout@v3
+
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v3
         with:
           node-version: '18'
 
       - name: Install dependencies
         run: |
-          npm install -g marked puppeteer
+          npm init -y
+          npm install marked puppeteer
 
       - name: Convert PDFs
         id: convert
         run: |
-          # Create temporary file to store successful conversions
-          SUCCESS_LIST=$(mktemp)
-          
-          # Process each language
           for lang in zh en de; do
             echo "Processing $lang..."
-            
-            # Set input and output paths
             INPUT_FILE="${lang}/README.md"
-            OUTPUT_FILE="${lang}/obsidian-cheatsheet-${lang}.pdf"
-            
-            echo "Input file: $INPUT_FILE"
-            echo "Output file: $OUTPUT_FILE"
+            OUTPUT_FILE="${lang}/obsidian-cheatsheet_${lang}.pdf"
             
             if [ -f "$INPUT_FILE" ]; then
-              # Create output directory if it doesn't exist
               mkdir -p "$(dirname "$OUTPUT_FILE")"
-              
-              # Convert markdown to PDF
-              echo "Converting $INPUT_FILE to PDF..."
-              if node .github/workflows/convert.js "$lang" "$INPUT_FILE" "$OUTPUT_FILE"; then
-                if [ -f "$OUTPUT_FILE" ]; then
-                  echo "Successfully created: $OUTPUT_FILE"
-                  echo "$OUTPUT_FILE" >> "$SUCCESS_LIST"
-                else
-                  echo "Error: PDF file not found after conversion"
-                fi
-              else
-                echo "Error: Conversion failed for $lang"
-              fi
-            else
-              echo "Warning: Input file not found: $INPUT_FILE"
+              node .github/workflows/convert.js "$lang" "$INPUT_FILE" "$OUTPUT_FILE"
             fi
           done
-          
-          # Check if any files were successfully generated
-          if [ -s "$SUCCESS_LIST" ]; then
-            echo "Generated PDF files:"
-            cat "$SUCCESS_LIST"
-            echo "Files in workspace:"
-            find . -type f -name "*.pdf"
-            
-            # Set output variables
-            echo "has_pdfs=true" >> $GITHUB_OUTPUT
-          else
-            echo "No PDF files were generated"
-            echo "has_pdfs=false" >> $GITHUB_OUTPUT
-          fi
-          
-          # Cleanup temporary file
-          rm -f "$SUCCESS_LIST"
 
-      - name: Upload PDFs as artifacts
-        if: steps.convert.outputs.has_pdfs == 'true'
-        uses: actions/upload-artifact@v4
+      - name: Commit PDFs
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          name: obsidian-cheatsheets
-          path: |
-            zh/obsidian-cheatsheet-zh.pdf
-            en/obsidian-cheatsheet-en.pdf
-            de/obsidian-cheatsheet-de.pdf
-          retention-days: 90
-          if-no-files-found: warn
+          commit_message: 'chore: Update PDF files'
+          file_pattern: '**/obsidian-cheatsheet_*.pdf'
