@@ -65,7 +65,7 @@ jobs:
               
               # Convert markdown to PDF
               echo "Converting $INPUT_FILE to PDF..."
-              if md-to-pdf "$INPUT_FILE" --config-file .md2pdf.json --output "$OUTPUT_FILE" --debug; then
+              if md-to-pdf "$INPUT_FILE" -o "$OUTPUT_FILE" --config-file .md2pdf.json --debug; then
                 if [ -f "$OUTPUT_FILE" ]; then
                   echo "Successfully created: $OUTPUT_FILE"
                   echo "$OUTPUT_FILE" >> "$SUCCESS_LIST"
